@@ -1,4 +1,4 @@
-import { Box } from '@chakra-ui/react';
+import { Box, Link, Td, useColorMode } from '@chakra-ui/react';
 import { Table, Thead, Tbody, Tr, Th, TableContainer, Heading } from '@chakra-ui/react'
 import { FC, useEffect, useState } from 'react';
 import { useSDK } from '@thirdweb-dev/react';
@@ -8,11 +8,14 @@ import BTCB_ABI from '../../../utils/BTCB_ABI.json'
 const Home = () => {
   const sdk = useSDK();
   const [transactions, setTransactions] = useState<any>([]);
+  const { colorMode } = useColorMode();
+
   useEffect(() => {
     const init = async () => {
       let contract = await sdk?.getContractFromAbi(process.env.NEXT_PUBLIC_BTCB_ADDRESS || "", BTCB_ABI);
-      const events = await contract?.events.getAllEvents({ fromBlock: 23917314, toBlock: 23927314 })
-  
+      const lastBlock = await sdk?.getProvider().getBlockNumber();
+      const events = await contract?.events.getAllEvents({ fromBlock: (lastBlock || 10000) - 10000, toBlock: (lastBlock || 0) });
+      
       const trxs = events?.filter(x => x.eventName == "Transfer")
       .filter(x => parseFloat(ethers.utils.formatEther(x.data.value)) > 1)
       .filter((value, index, self) =>
@@ -22,7 +25,7 @@ const Home = () => {
       .map(x => { 
         return {
           hash: x.transaction.transactionHash, 
-          age: 0,
+          block: x.transaction.blockNumber,
           from: x.data.from,
           to: x.data.to,
           value: ethers.utils.formatEther(x.data.value)
@@ -45,7 +48,7 @@ const Home = () => {
           <Thead>
             <Tr>
               <Th>Trx Hash</Th>
-              <Th>Age</Th>
+              <Th>Block</Th>
               <Th>From</Th>
               <Th>To</Th>
               <Th>Value</Th>
@@ -55,11 +58,23 @@ const Home = () => {
             {
               transactions?.map((trx: any) => (
                 <Tr key={trx.hash}>
-                  <td>{trx.hash}</td>
-                  <td>{trx.age}</td>
-                  <td>{trx.from}</td>
-                  <td>{trx.to}</td>
-                  <td>{trx.value} BTCB</td>
+                  <Td>
+                    <Link href={"https://bscscan.com/tx/" + trx.hash} color={colorMode === "dark" ? "#90cdf4" : "#3182ce"} isExternal>
+                      {trx.hash.slice(0, 20) + "..."}
+                    </Link>
+                  </Td>
+                  <Td>{trx.block}</Td>
+                  <Td>
+                    <Link href={"https://bscscan.com/address/" + trx.from} color={colorMode === "dark" ? "#90cdf4" : "#3182ce"} isExternal>
+                      {trx.from.slice(0, 20) + "..."}
+                    </Link>
+                  </Td>
+                  <Td>
+                    <Link href={"https://bscscan.com/address/" + trx.from} color={colorMode === "dark" ? "#90cdf4" : "#3182ce"} isExternal>
+                      {trx.to.slice(0, 20) + "..."}
+                    </Link>
+                  </Td>
+                  <Td>{trx.value} BTCB</Td>
                 </Tr>
               ))
             }

@@ -1,9 +1,4 @@
 tbody tr:hover {
   background-color: rgba(0, 0, 0, 0.1);
   filter: brightness(120%);
-  cursor: pointer;
-}
-
-.change-cursor:hover {
-  cursor: pointer;
 }

@@ -16,7 +16,9 @@ import {
   Text,
   FormControl,
   Input,
-  useToast
+  useToast,
+  Link,
+  useColorMode
 } from '@chakra-ui/react';
 import { useAddress, useSDK } from '@thirdweb-dev/react';
 import { Error } from 'components/elements/Error';
@@ -30,6 +32,7 @@ const Withdrawals = () => {
   const sdk = useSDK();
   const address = useAddress();
   const toast = useToast();
+  const { colorMode } = useColorMode();
   const [enabled, setEnabled] = useState(false);
   var bestToken: any;
 
@@ -161,7 +164,7 @@ const Withdrawals = () => {
                   <Formik initialValues={{}} validateOnChange={false} validateOnBlur={false} onSubmit={(_, actions) => {formSubmit(actions);}}>
                     {(props) => (
                       <Form>
-                        <HStack w="xl">
+                        <HStack w={["xs","lg"]}>
                           <FormControl isRequired isDisabled={!address || !enabled}>
                             <Input placeholder="Receiver Address"/>
                           </FormControl>
@@ -194,19 +197,31 @@ const Withdrawals = () => {
               <Tbody>
                 <Tr>
                   <Td>2022/12/12 16:46:12 UTC</Td>
-                  <Td>0x6acd4474EC51409696A6d86ac9f29294352B1f43</Td>
+                  <Td>
+                    <Link href={"https://bscscan.com/tx/0x6acd4474EC51409696A6d86ac9f29294352B1f43"} color={colorMode === "dark" ? "#90cdf4" : "#3182ce"} isExternal>
+                      0x6acd4474EC51409696A6d86ac9f29294352B1f43
+                    </Link>
+                  </Td>
                   <Td>0.2 WBTC</Td>
                   <Td>0.025 XPR</Td>
                 </Tr>
                 <Tr>
                   <Td>2022/10/01 13:19:11 UTC</Td>
-                  <Td>0x6acd4474EC51409696A6d86ac9f29294352B1f43</Td>
+                  <Td>
+                    <Link href={"https://bscscan.com/tx/0x6acd4474EC51409696A6d86ac9f29294352B1f43"} color={colorMode === "dark" ? "#90cdf4" : "#3182ce"} isExternal>
+                      0x6acd4474EC51409696A6d86ac9f29294352B1f43
+                    </Link>
+                  </Td>
                   <Td>0.012 WBTC</Td>
                   <Td>0.01 XPR</Td>
                 </Tr>
                 <Tr>
                   <Td>2022/09/28 09:23:17 UTC</Td>
-                  <Td>0x6acd4474EC51409696A6d86ac9f29294352B1f43</Td>
+                  <Td>
+                    <Link href={"https://bscscan.com/tx/0x6acd4474EC51409696A6d86ac9f29294352B1f43"} color={colorMode === "dark" ? "#90cdf4" : "#3182ce"} isExternal>
+                      0x6acd4474EC51409696A6d86ac9f29294352B1f43
+                    </Link>
+                  </Td>
                   <Td>0.002 WBTC</Td>
                   <Td>0.0015 XPR</Td>
                 </Tr>
