@@ -22,7 +22,6 @@
     "eslint-config-next": "13.0.2",
     "ethers": "^5.7.2",
     "formik": "^2.2.9",
-    "fs": "^0.0.1-security",
     "mongodb": "^4.11.0",
     "mongoose": "^6.8.0",
     "next": "^12.3.3",

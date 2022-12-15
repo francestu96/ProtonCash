@@ -3,13 +3,14 @@ import { Table, Thead, Tbody, Tr, Th, TableContainer, Heading } from '@chakra-ui
 import { FC, useEffect, useState } from 'react';
 import { useSDK } from '@thirdweb-dev/react';
 import { ethers } from 'ethers';
+import BTCB_ABI from '../../../utils/BTCB_ABI.json'
 
-const Home: FC<any> = ({ abi }) => {
+const Home = () => {
   const sdk = useSDK();
   const [transactions, setTransactions] = useState<any>([]);
   useEffect(() => {
     const init = async () => {
-      let contract = await sdk?.getContractFromAbi(process.env.NEXT_PUBLIC_BTCB_ADDRESS || "", abi);
+      let contract = await sdk?.getContractFromAbi(process.env.NEXT_PUBLIC_BTCB_ADDRESS || "", BTCB_ABI);
       const events = await contract?.events.getAllEvents({ fromBlock: 23917314, toBlock: 23927314 })
   
       const trxs = events?.filter(x => x.eventName == "Transfer")
@@ -32,7 +33,7 @@ const Home: FC<any> = ({ abi }) => {
     }
 
     init();
-  }, [sdk, abi])
+  }, [sdk])
 
   return (
     <Box>
