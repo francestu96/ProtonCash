@@ -1,8 +1,8 @@
 import { CloseIcon, HamburgerIcon } from '@chakra-ui/icons';
 import { Box, Flex, HStack, IconButton, useColorModeValue, useColorMode, VStack, useDisclosure, Text, ScaleFade, Slide, Button, Center } from '@chakra-ui/react';
 import { ColorModeButton, Logo, NavItem } from 'components/elements';
-import React from 'react';
-import { ConnectWallet } from "@thirdweb-dev/react";
+import React, { useEffect } from 'react';
+import { ConnectWallet, useAddress, useNetwork, useNetworkMismatch } from "@thirdweb-dev/react";
 import { useSession, signIn } from "next-auth/react";
 import NAV_LINKS from './paths';
 
@@ -10,6 +10,15 @@ const Header = () => {
   const { data: session } = useSession();
   const { isOpen, onToggle } = useDisclosure();
   const { colorMode } = useColorMode();
+  const address = useAddress();
+  const [, switchNetwork] = useNetwork();
+  const isMismatched = useNetworkMismatch();
+  
+  useEffect(() => {
+    if (isMismatched && switchNetwork) {
+      switchNetwork(parseInt(process.env.NEXT_PUBLIC_APP_CHAIN_ID || "1"));
+    }
+  }, [address]);
 
   return (
     <Box borderBottom="1px" borderBottomColor="chakra-border-color" p={'10px'}>
