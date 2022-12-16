@@ -1,36 +1,34 @@
-import { Box, Text } from '@chakra-ui/react';
+import { Flex, HStack, Link, Text, VStack, Image } from '@chakra-ui/react';
 
-// const links = {
-//   github: 'https://github.com/ethereum-boilerplate/ethereum-boilerplate/',
-//   forum: 'https://forum.moralis.io/',
-//   moralis: 'https://moralis.io/?utm_source=boilerplatehosted&utm_medium=todo&utm_campaign=ethereum-boilerplat',
-// };
-
-const Footer = () => {
-  return (
-    <Box textAlign={'center'} w="full" p={6}>
-        <Text>Footer...</Text>
-      {/* <Text>
-        ⭐️ Please star this{' '}
-        <Link href={links.github} isExternal alignItems={'center'}>
-          boilerplate <ExternalLinkIcon />
-        </Link>
-        , every star makes us very happy!
+const Footer = () => (
+  <>
+  <Flex margin="auto" maxW="container.lg" justify="space-between" p={3} borderTopWidth='1px' borderTopRadius='lg' display={["none", "flex", "flex", "flex"]} fontSize={["xs", "xs", "sm", "sm"]}>
+    <Text color="gray.400">
+      © 2022 Metallicus Inc
+    </Text>
+    <Text color="gray.400">
+      660 4th Street, #107, San Francisco, CA 94107, United States
+    </Text>
+    <HStack>
+      <Link href="https://twitter.com/protonxpr" isExternal alignItems={'center'}><Image src="twitter-logo.svg" w="20px" h="20px" m={1}/></Link>
+      <Link href="https://t.me/protonxpr" isExternal alignItems={'center'}><Image src="telegram-logo.svg" w="20px" h="20px" m={1}/></Link>
+    </HStack>
+  </Flex>
+  <Flex margin="auto" maxW="container.lg" p={3} borderTopWidth='1px' borderTopRadius='lg' display={["block", "none", "none", "none"]} fontSize={["xs", "xs", "sm", "sm"]}>
+    <VStack>
+      <HStack>
+        <Link href="https://twitter.com/protonxpr" isExternal alignItems={'center'}><Image src="twitter-logo.svg" w="20px" h="20px" m={1}/></Link>
+        <Link href="https://t.me/protonxpr" isExternal alignItems={'center'}><Image src="telegram-logo.svg" w="20px" h="20px" m={1}/></Link>
+      </HStack>
+      <Text color="gray.400">
+        © 2022 Metallicus Inc
       </Text>
-      <Text>
-        🙋 You have questions? Ask them on the{' '}
-        <Link href={links.forum} isExternal alignItems={'center'}>
-          Moralis forum <ExternalLinkIcon />
-        </Link>
+      <Text color="gray.400">
+        660 4th Street, #107, San Francisco, CA 94107, United States
       </Text>
-      <Text>
-        📖 Read more about{' '}
-        <Link href={links.moralis} isExternal alignItems={'center'}>
-          Moralis <ExternalLinkIcon />
-        </Link>
-      </Text> */}
-    </Box>
-  );
-};
+    </VStack>
+  </Flex>
+  </>
+);
 
 export default Footer;

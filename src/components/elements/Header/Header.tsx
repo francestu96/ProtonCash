@@ -22,7 +22,7 @@ const Header = () => {
 
   return (
     <Box borderBottom="1px" borderBottomColor="chakra-border-color" p={'10px'}>
-        <Flex justify="space-between" display={['none', 'none', 'flex','flex']}>
+        <Flex justify="space-between" display={['none', 'none', 'none','flex']}>
           <Logo />
           <HStack gap={'15px'} alignItems="center">
             {NAV_LINKS.map((link) => (
@@ -41,7 +41,7 @@ const Header = () => {
             <ColorModeButton />
           </HStack>
         </Flex>
-        <Flex align="center" justify="space-between" display={['flex', 'flex', 'none','none']}>
+        <Flex align="center" justify="space-between" display={['flex', 'flex', 'flex','none']}>
           <Logo />
           <IconButton aria-label="Open Menu" size="lg" mr={2} icon={<HamburgerIcon/>} onClick={onToggle}/>
         </Flex> 
