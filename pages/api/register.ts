@@ -42,14 +42,13 @@ export default async function handler(
   req: NextApiRequest,
   res: NextApiResponse<ResponseData>
 ) {
-  // validate if it is a POST
+
   if (req.method !== "POST") {
     return res
       .status(200)
       .json({ error: "This API call only accepts POST methods" });
   }
 
-  // get and validate body variables
   const { username, email, password } = req.body;
 
   const errorMessage = await validateForm(username, email, password);
@@ -57,7 +56,6 @@ export default async function handler(
     return res.status(400).json(errorMessage as ResponseData);
   }
 
-  // create new User on MongoDB
   const newUser = new User({
     name: username,
     email,

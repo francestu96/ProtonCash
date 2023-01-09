@@ -11,8 +11,8 @@ export default NextAuth({
       id: "credentials",
       name: "Credentials",
       credentials: {
-        email: {
-          label: "Email",
+        telegramId: {
+          label: "Id",
           type: "text",
         },
         password: {
@@ -20,15 +20,16 @@ export default NextAuth({
           type: "text",
         },
       },
+      
       async authorize(credentials) {
         await dbConnect();
 
         const user = await User.findOne({
-          email: credentials?.email,
+          telegramId: credentials?.telegramId,
         });
 
         if (!user) {
-          throw new Error("Email is not registered");
+          throw new Error("Telegram ID is not registered");
         }
 
         if (credentials!.password !== user.password) {

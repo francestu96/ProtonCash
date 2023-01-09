@@ -1,6 +1,6 @@
 import { useState } from "react";
 import type { NextPage } from "next";
-import { useSession, signIn, getProviders } from "next-auth/react";
+import { signIn } from "next-auth/react";
 import {
   Button,
   Flex,
@@ -12,11 +12,13 @@ import {
   Text,
   useToast,
   useColorMode,
+  Tooltip,
 } from "@chakra-ui/react";
 import { Field, Form, Formik } from "formik";
 import axios from "axios";
 import Router from "next/router";
 import { Default } from "components/templates/Default";
+import { InfoIcon } from "@chakra-ui/icons";
 
 interface IDivicerProps {
   word?: string;
@@ -50,43 +52,17 @@ const Divider = ({ word }: IDivicerProps) => {
   );
 };
 
-const Auth: NextPage = ({ providers }: any) => {
+const Auth: NextPage = () => {
   const { colorMode } = useColorMode();
   const toast = useToast();
-  const { data: session } = useSession();
   const [authType, setAuthType] = useState("Login");
   const oppAuthType: { [key: string]: string } = {
     Login: "Register",
     Register: "Login",
   };
   const [username, setUsername] = useState("");
-  const [email, setEmail] = useState("");
+  const [telegramId, setTelegramId] = useState("");
   const [password, setPassword] = useState("");
-
-  const ProvidersButtons = ({ providers }: any) => (
-    <Flex direction="column" w="100%">
-      {Object.values(providers).map(
-        (provider: any) =>
-          provider.name !== "Credentials" && (
-            <Button
-              key={provider.name}
-              mb={4}
-              bg={"#24292E"}
-              color={"white"}
-              _hover={{ bg: "#24292E90" }}
-              type="submit"
-              onClick={() => {
-                signIn(provider.id, {
-                  callbackUrl: `${process.env.URL_DEV}/`,
-                });
-              }}
-            >
-              <Box>Sign in with {provider.name}</Box>
-            </Button>
-          )
-      )}
-    </Flex>
-  );
 
   const redirectToHome = () => {
     const { pathname } = Router;
@@ -95,11 +71,13 @@ const Auth: NextPage = ({ providers }: any) => {
     }
   };
 
+  const tooltip = "Try the NEW anonymous Sign In feature! You can now login completely anonymously by using your Telegram ID!"
+
   const registerUser = async () => {
     const res = await axios
       .post(
         "/api/register",
-        { username, email, password },
+        { username, telegramId, password },
         {
           headers: {
             Accept: "application/json",
@@ -120,9 +98,9 @@ const Auth: NextPage = ({ providers }: any) => {
   const loginUser = async () => {
     const res: any = await signIn("credentials", {
       redirect: false,
-      email: email,
+      telegramId: telegramId,
       password: password,
-      callbackUrl: `${window.location.origin}`,
+      callbackUrl: `${window.location.origin}`
     });
 
     res.error ? toast({description: res.error, status: 'error', position: 'bottom-right', isClosable: true, duration: 3000}) : redirectToHome();
@@ -150,8 +128,6 @@ const Auth: NextPage = ({ providers }: any) => {
 
           <Divider />
 
-          <ProvidersButtons providers={providers} />
-
           <Divider word="Or" />
 
           <Formik initialValues={{}} validateOnChange={false} validateOnBlur={false} onSubmit={(_, actions) => {formSubmit(actions);}}>
@@ -163,24 +139,34 @@ const Auth: NextPage = ({ providers }: any) => {
                       {() => (
                         <FormControl isRequired mb={6}>
                           <FormLabel htmlFor="username">Username:</FormLabel>
-                          <Input value={username} onChange={(e) => setUsername(e.target.value)} placeholder="Username" background={colorMode === "dark" ? "#3182ce" : "#90cdf4"}/>
+                          <Input value={username} onChange={(e) => setUsername(e.target.value)} placeholder="Username" background={colorMode === "dark" ? "rgba(49, 130, 206, 0.4)" : "#90cdf4"}/>
                         </FormControl>
                       )}
                     </Field>
                   )}
-                  <Field name="email">
+                  <Field name="id">
                     {() => (
-                      <FormControl isRequired mb={6}>
-                        <FormLabel htmlFor="email">Email:</FormLabel>
-                        <Input value={email} onChange={(e) => setEmail(e.target.value)} placeholder="Email Address" background={colorMode === "dark" ? "#3182ce" : "#90cdf4"}/>
-                      </FormControl>
+                      <>
+                        <FormControl isRequired mb={6} mt={2}>
+                          <FormLabel htmlFor="telegramId">
+                            Telegram ID:
+                          </FormLabel>
+                          <Flex>
+                            <Input flex="84" value={telegramId} onChange={(e) => setTelegramId(e.target.value)} placeholder="Telegram ID" background={colorMode === "dark" ? "rgba(49, 130, 206, 0.4)" : "#90cdf4"}/>
+                            <Box flex="2"></Box>
+                            <Tooltip alignSelf="end" hasArrow label={tooltip} fontSize='sm'>
+                              <Button flex="14" ml="auto" bg={colorMode === "dark" ? "#90cdf4" : "#3182ce"} cursor="unset" borderRadius="full" fontSize={["xs", "sm", "md", "md"]}>New<InfoIcon ml="2"/></Button>
+                            </Tooltip>
+                          </Flex>
+                        </FormControl>
+                      </>
                     )}
                   </Field>
                   <Field name="password">
                     {() => (
                       <FormControl isRequired mb={3}>
                         <FormLabel htmlFor="password">Password</FormLabel>
-                        <Input value={password} onChange={(e) => setPassword(e.target.value)} type="password" placeholder="Password" background={colorMode === "dark" ? "#3182ce" : "#90cdf4"}/>
+                        <Input value={password} onChange={(e) => setPassword(e.target.value)} type="password" placeholder="Password" background={colorMode === "dark" ? "rgba(49, 130, 206, 0.4)" : "#90cdf4"}/>
                       </FormControl>
                     )}
                   </Field>
@@ -198,11 +184,3 @@ const Auth: NextPage = ({ providers }: any) => {
 };
 
 export default Auth;
-
-export async function getServerSideProps() {
-  return {
-    props: {
-      providers: await getProviders(),
-    },
-  };
-}
