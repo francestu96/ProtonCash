@@ -138,8 +138,8 @@ const Auth: NextPage = () => {
                     <Field name="username">
                       {() => (
                         <FormControl isRequired mb={6}>
-                          <FormLabel htmlFor="username">Username:</FormLabel>
-                          <Input value={username} onChange={(e) => setUsername(e.target.value)} placeholder="Username" background={colorMode === "dark" ? "rgba(49, 130, 206, 0.4)" : "#90cdf4"}/>
+                          <FormLabel htmlFor="username">Name:</FormLabel>
+                          <Input value={username} onChange={(e) => setUsername(e.target.value)} placeholder="Your displayed Name" background={colorMode === "dark" ? "rgba(49, 130, 206, 0.4)" : "#90cdf4"}/>
                         </FormControl>
                       )}
                     </Field>

@@ -172,8 +172,8 @@ const Withdrawals = () => {
                   Pending Withdrawals:
                 </Heading>
                 <HStack>
-                  <Image src="/wbtc.png" borderRadius="full" boxSize="32px" />
-                  <Text>0.32 <Text as="span" fontWeight="bold">WBTC</Text> ($5680.45)</Text>
+                  <Image src="/btcb.png" borderRadius="full" boxSize="26px" ml="1"/>
+                  <Text>0.32 <Text as="span" fontWeight="bold">BTCB</Text> ($5680.45)</Text>
                 </HStack>
                 <HStack>
                   <Image src="/busd.png" borderRadius="full" boxSize="26px" ml="1"/>
@@ -224,7 +224,7 @@ const Withdrawals = () => {
                       0x6acd4474EC51409696A6d86ac9f29294352B1f43
                     </Link>
                   </Td>
-                  <Td>0.2 WBTC</Td>
+                  <Td>0.2 BTCB</Td>
                   <Td>0.025 XPR</Td>
                 </Tr>
                 <Tr>
@@ -234,7 +234,7 @@ const Withdrawals = () => {
                       0x6acd4474EC51409696A6d86ac9f29294352B1f43
                     </Link>
                   </Td>
-                  <Td>0.012 WBTC</Td>
+                  <Td>0.012 BTCB</Td>
                   <Td>0.01 XPR</Td>
                 </Tr>
                 <Tr>
@@ -244,7 +244,7 @@ const Withdrawals = () => {
                       0x6acd4474EC51409696A6d86ac9f29294352B1f43
                     </Link>
                   </Td>
-                  <Td>0.002 WBTC</Td>
+                  <Td>0.002 BTCB</Td>
                   <Td>0.0015 XPR</Td>
                 </Tr>
               </Tbody>
