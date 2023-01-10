@@ -7,28 +7,24 @@ interface ResponseData {
   msg?: string;
 }
 
-const validateEmail = (email: string): boolean => {
-  const regEx = /^[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}$/i;
-  return regEx.test(email);
+const validateTelegramId = (telegramId: string): boolean => {
+  const regEx = /(?=.{5,64}(?:\s|$))(?![_])(?!.*[_]{2})[a-zA-Z0-9_]+(?<![_.])/i;
+  return regEx.test(telegramId);
 };
 
-const validateForm = async (
-  username: string,
-  email: string,
-  password: string
-) => {
-  if (username.length < 3) {
-    return { error: "Username must have 3 or more characters" };
+const validateForm = async (name: string, telegramId: string, password: string) => {
+  if (name.length < 3) {
+    return { error: "Name must have 3 or more characters" };
   }
-  if (!validateEmail(email)) {
-    return { error: "Email is invalid" };
+  if (!validateTelegramId(telegramId)) {
+    return { error: "Telegram ID is invalid" };
   }
 
   await dbConnect();
-  const emailUser = await User.findOne({ email: email });
+  const telegramIdUser = await User.findOne({ telegramId: telegramId });
 
-  if (emailUser) {
-    return { error: "Email already exists" };
+  if (telegramIdUser) {
+    return { error: "Telegram ID already exists" };
   }
 
   if (password.length < 8) {
@@ -38,33 +34,23 @@ const validateForm = async (
   return null;
 };
 
-export default async function handler(
-  req: NextApiRequest,
-  res: NextApiResponse<ResponseData>
-) {
-
+export default async function handler(req: NextApiRequest, res: NextApiResponse<ResponseData>) {
   if (req.method !== "POST") {
     return res
       .status(200)
       .json({ error: "This API call only accepts POST methods" });
   }
 
-  const { username, email, password } = req.body;
+  const { name, telegramId, password } = req.body;
 
-  const errorMessage = await validateForm(username, email, password);
+  const errorMessage = await validateForm(name, telegramId, password);
   if (errorMessage) {
     return res.status(400).json(errorMessage as ResponseData);
   }
 
-  const newUser = new User({
-    name: username,
-    email,
-    password,
-  });
+  const newUser = new User({ name, telegramId, password });
 
-  newUser
-    .save()
-    .then(() =>
+  newUser.save().then(() =>
       res.status(200).json({ msg: "Successfuly created new User: " + newUser })
     )
     .catch((err: string) =>

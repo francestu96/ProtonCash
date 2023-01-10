@@ -14,6 +14,7 @@ const Header = () => {
   const address = useAddress();
   const [, switchNetwork] = useNetwork();
   const isMismatched = useNetworkMismatch();
+  const linkColor =  useColorModeValue('green.50', 'gray.900');
   
   useEffect(() => {
     if (isMismatched && switchNetwork) {
@@ -47,7 +48,7 @@ const Header = () => {
                   </PopoverTrigger>
                   <PopoverContent border={0} boxShadow={'xl'} p={4} rounded={'xl'} w={'15em'}>
                       <NextLink href="myprofile">
-                        <Link role={'group'} display={'block'} p={2} rounded={'md'} _hover={{ bg: useColorModeValue('green.50', 'gray.900') }}>                        
+                        <Link role={'group'} display={'block'} p={2} rounded={'md'} _hover={{ bg: linkColor}}>                        
                           <Stack direction={'row'} align={'center'}>
                             <Box>
                               <Text transition={'all .3s ease'} _groupHover={{ color: 'green.400' }} fontWeight={500}>
@@ -102,7 +103,7 @@ const Header = () => {
                         </PopoverTrigger>
                         <PopoverContent border={0} boxShadow={'xl'} p={4} rounded={'xl'} w={'15em'}>
                             <NextLink href="myprofile">
-                              <Link role={'group'} display={'block'} p={2} rounded={'md'} _hover={{ bg: useColorModeValue('green.50', 'gray.900') }}>                        
+                              <Link role={'group'} display={'block'} p={2} rounded={'md'} _hover={{ bg: linkColor }}>                        
                                 <Stack direction={'row'} align={'center'}>
                                   <Box>
                                     <Text transition={'all .3s ease'} _groupHover={{ color: 'green.400' }} fontWeight={500}>

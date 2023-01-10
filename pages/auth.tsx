@@ -60,7 +60,7 @@ const Auth: NextPage = () => {
     Login: "Register",
     Register: "Login",
   };
-  const [username, setUsername] = useState("");
+  const [name, setName] = useState("");
   const [telegramId, setTelegramId] = useState("");
   const [password, setPassword] = useState("");
 
@@ -74,17 +74,7 @@ const Auth: NextPage = () => {
   const tooltip = "Try the NEW anonymous Sign In feature! You can now login completely anonymously by using your Telegram ID!"
 
   const registerUser = async () => {
-    const res = await axios
-      .post(
-        "/api/register",
-        { username, telegramId, password },
-        {
-          headers: {
-            Accept: "application/json",
-            "Content-Type": "application/json",
-          },
-        }
-      )
+    const res = await axios.post("/api/register", { name, telegramId, password })
       .then(async () => {
         await loginUser();
         redirectToHome();
@@ -92,7 +82,6 @@ const Auth: NextPage = () => {
       .catch((error) => {
         toast({description: error.response.data.error, status: 'error', position: 'bottom-right', isClosable: true, duration: 3000})
       });
-    console.log(res);
   };
 
   const loginUser = async () => {
@@ -135,11 +124,11 @@ const Auth: NextPage = () => {
               <Form style={{ width: "100%" }}>
                 <Box display="flex" flexDirection="column" w="100%" mb={4}>
                   {authType === "Register" && (
-                    <Field name="username">
+                    <Field name="name">
                       {() => (
                         <FormControl isRequired mb={6}>
-                          <FormLabel htmlFor="username">Name:</FormLabel>
-                          <Input value={username} onChange={(e) => setUsername(e.target.value)} placeholder="Your displayed Name" background={colorMode === "dark" ? "rgba(49, 130, 206, 0.4)" : "#90cdf4"}/>
+                          <FormLabel htmlFor="name">Name:</FormLabel>
+                          <Input value={name} onChange={(e) => setName(e.target.value)} placeholder="Your displayed Name" background={colorMode === "dark" ? "rgba(49, 130, 206, 0.4)" : "#90cdf4"}/>
                         </FormControl>
                       )}
                     </Field>

@@ -8,9 +8,9 @@ const userSchema = new Schema({
     requeired: true,
     unique: true,
   },
-  email: {
+  telegramId: {
     type: String,
-    required: true,
+    requeired: true,
     unique: true,
   },
   password: {
@@ -18,9 +18,16 @@ const userSchema = new Schema({
     required: true,
     minlength: 8,
   },
-  image: {
+  email: {
     type: String,
+    required: false,
+    unique: true,
   },
+  phone: {
+    type: String,
+    required: false,
+    unique: true,
+  }
 });
 
 const User = mongoose.models.User || mongoose.model("User", userSchema);

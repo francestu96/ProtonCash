@@ -47,9 +47,31 @@ export default NextAuth({
   adapter: MongoDBAdapter(clientPromise),
   session: {
     strategy: "jwt",
+    
   },
   jwt: {
     secret: process.env.NEXTAUTH_JWT_SECRET,
+  },
+  callbacks: {
+    async jwt({ token, user }) {
+      if (user) {
+        token.name = user.name;
+        token.telegramId = user.telegramId;
+        token.email = user.email;
+        token.phone = user.phone;
+      }
+
+      return token;
+    },
+    async session({ session, token }) {
+      if (token) {
+        session.user.name = token.name;
+        session.user.telegramId = token.telegramId;
+        session.user.email = token.email;
+        session.user.phone = token.phone;
+      }
+      return session;
+    }
   },
   secret: process.env.NEXTAUTH_SECRET,
 });
