@@ -1,7 +1,6 @@
 import {
   Heading,
   Box,
-  Flex,
   Button,
   TableContainer,
   Table,
@@ -16,12 +15,21 @@ import {
   Link,
   useColorMode,
   FormLabel,
-  Tooltip
+  Tooltip,
+  AlertDialog,
+  AlertDialogBody,
+  AlertDialogCloseButton,
+  AlertDialogContent,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogOverlay,
+  useDisclosure
 } from '@chakra-ui/react';
 import axios from 'axios';
 import { Error } from 'components/elements/Error';
 import { Formik, Form, Field } from 'formik';
-import { useSession } from 'next-auth/react';
+import { signOut, useSession } from 'next-auth/react';
+import { useRef } from 'react';
 import { useState } from 'react';
 
 const MyProfile = () => {
@@ -31,14 +39,21 @@ const MyProfile = () => {
   const [name, setName] = useState(session?.user.name);
   const [email, setEmail] = useState(session?.user.email);
   const [phone, setPhone] = useState(session?.user.phone);
+  const { isOpen, onOpen, onClose } = useDisclosure()
+  const cancelRef = useRef<HTMLButtonElement>(null);
 
-  const formSubmit = async (actions: any) => {
+  const checkAlert = (actions: any) => {
     actions.setSubmitting(false);
+    onOpen();
+  };
 
+  const formSubmit: any = async () => {
+    onClose();
     let telegramId = session?.user?.telegramId || "";
+
     const res = await axios.post("/api/update", { telegramId, name, email, phone })
       .then(() => {
-        toast({description: "Info successfully updated", status: 'success', position: 'bottom-right', isClosable: true, duration: 3000})
+        signOut();
       })
       .catch((error) => {
         toast({description: error.response.data.error, status: 'error', position: 'bottom-right', isClosable: true, duration: 3000})
@@ -52,8 +67,8 @@ const MyProfile = () => {
       </Heading>
       { !session ? <Error msg={"<b>Sign In</b> to your account first"}/> :
         <Box>
-          <Box borderWidth='2px' borderRadius='lg' p="1em" w="50%">
-            <Formik initialValues={{}} validateOnChange={false} validateOnBlur={false} onSubmit={(_, actions) => {formSubmit(actions);}}>
+          <Box borderWidth='2px' borderRadius='lg' p="1em" w={["100%", "75%", "50%"]}>
+            <Formik initialValues={{}} validateOnChange={false} validateOnBlur={false} onSubmit={(_, actions) => {checkAlert(actions);}}>
               {(props) => (
                 <Form style={{ width: "100%" }}>
                   <Box display="flex" flexDirection="column" w="100%" mb={4}>
@@ -94,6 +109,22 @@ const MyProfile = () => {
                     <Button mt={6} bg={colorMode === "dark" ? "#90cdf4" : "#3182ce"} isLoading={props.isSubmitting} type="submit">
                       Update Information
                     </Button>
+                    <AlertDialog motionPreset='slideInBottom' leastDestructiveRef={cancelRef} onClose={onClose} isOpen={isOpen} isCentered>
+                      <AlertDialogOverlay/>
+                      <AlertDialogContent>
+                        <AlertDialogHeader>Update Information?</AlertDialogHeader>
+                        <AlertDialogCloseButton />
+                        <AlertDialogBody>For updating your information you need to Sign Out.<br></br>Do you want to continue?</AlertDialogBody>
+                        <AlertDialogFooter>
+                          <Button ref={cancelRef} onClick={onClose}>
+                            No
+                          </Button>
+                          <Button colorScheme='red' ml={3} onClick={formSubmit}>
+                            Yes
+                          </Button>
+                        </AlertDialogFooter>
+                      </AlertDialogContent>
+                    </AlertDialog>
                   </Box>
                 </Form>
               )}
