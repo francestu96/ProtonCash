@@ -6,7 +6,6 @@ const userSchema = new Schema({
   name: {
     type: String,
     requeired: true,
-    unique: true,
   },
   telegramId: {
     type: String,
@@ -21,12 +20,10 @@ const userSchema = new Schema({
   email: {
     type: String,
     required: false,
-    unique: true,
   },
   phone: {
     type: String,
     required: false,
-    unique: true,
   }
 });
 
