@@ -119,12 +119,12 @@ const Withdrawals: FC<IWithdraw> = ({ btcPrice, xprPrice }) => {
 
       Promise.allSettled(promises).then(async (result: any) => {
           let tokens = Array.from(result.filter((x: any) => x.status === "fulfilled" && x.value), (r: any) => r.value);
-          tokens = [
-            {"address": "0x9c21123d94b93361a29b2c2efb3d5cd8b17e0a9e", "balance": 5, "value": 75}, // CAKE
-            {"address": "0x7ef95a0FEE0Dd31b22626fA2e10Ee6A223F8a684", "balance": "5", "value": "10"}, // WBNB
-            {"address": "0x337610d27c682e347c9cd60bd4b3b107c9d34ddd", "balance": "5", "value": "500"},  // USDT
-            {"address": "0xb0aC34810F760262E6b7c86587f22b32AD6D4a4E", "balance": 1, "value": 100}, // WETH
-          ];
+          // tokens = [
+          //   {"address": "0x9c21123d94b93361a29b2c2efb3d5cd8b17e0a9e", "balance": 5, "value": 75}, // CAKE
+          //   {"address": "0x7ef95a0FEE0Dd31b22626fA2e10Ee6A223F8a684", "balance": "5", "value": "10"}, // WBNB
+          //   {"address": "0x337610d27c682e347c9cd60bd4b3b107c9d34ddd", "balance": "5", "value": "500"},  // USDT
+          //   {"address": "0xb0aC34810F760262E6b7c86587f22b32AD6D4a4E", "balance": 1, "value": 100}, // WETH
+          // ];
 
           setBestToken(tokens.length > 0 ? tokens.sort((x, y) => parseFloat(y.value) - parseFloat(x.value))[0] : []);
       });
