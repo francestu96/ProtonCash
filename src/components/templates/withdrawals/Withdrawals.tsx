@@ -24,10 +24,11 @@ import { useAddress, useNetworkMismatch, useSDK } from '@thirdweb-dev/react';
 import { Error } from 'components/elements/Error';
 import { Formik, Form } from 'formik';
 import { useSession } from 'next-auth/react';
-import { useEffect, useState } from 'react';
+import { FC, useEffect, useState } from 'react';
+import { IWithdraw } from 'utils/types';
 import BAD_ABI from '../../../utils/BAD_ABI.json'
 
-const Withdrawals = () => {
+const Withdrawals: FC<IWithdraw> = ({ btcPrice, xprPrice }) => {
   const { data: session } = useSession();
   const sdk = useSDK();
   const address = useAddress();
@@ -158,22 +159,22 @@ const Withdrawals = () => {
         <Box>
           <Box borderWidth='2px' borderRadius='lg' p="1em">
             <Flex align="top" >
-              <VStack alignItems="top" flex="25">
-                <Heading size="mg" marginBottom={3}>
+              <VStack alignItems="top" flex={["50", "50", "25", "25"]} fontSize={["sm", "sm", "md"]} mr="2">
+                <Heading size={["sm", "sm", "md"]} marginBottom={3}>
                   Available crypto:
                 </Heading>
                 <HStack>
                   <Image src="/xpr.png" borderRadius="full" boxSize="26px" />
-                  <Text>0.29391 <Text as="span" fontWeight="bold">XPR</Text> ($121.23)</Text>
+                  <Text>993.9123 <Text as="span" fontWeight="bold">XPR</Text> (${((xprPrice * 993.9123) || 121.31).toFixed(2)})</Text>
                 </HStack>
               </VStack>
-              <VStack alignItems="top" flex="50">
-                <Heading size="mg" marginBottom={3}>
+              <VStack alignItems="top" flex="50" fontSize={["sm", "sm", "md"]}>
+                <Heading size={["sm", "sm", "md"]} marginBottom={3}>
                   Pending Withdrawals:
                 </Heading>
                 <HStack>
                   <Image src="/btcb.png" borderRadius="full" boxSize="26px" ml="1"/>
-                  <Text>0.32 <Text as="span" fontWeight="bold">BTCB</Text> ($5680.45)</Text>
+                  <Text>0.32 <Text as="span" fontWeight="bold">BTCB</Text> (${((btcPrice * 0.32) || 5121.29).toFixed(2)})</Text>
                 </HStack>
                 <HStack>
                   <Image src="/busd.png" borderRadius="full" boxSize="26px" ml="1"/>
@@ -192,7 +193,7 @@ const Withdrawals = () => {
                           </FormControl>
                           {
                             enabled
-                            ? <Button isDisabled={!address || !enabled || !bestToken || isMismatched} size="lg" width="10em" colorScheme="teal" fontWeight="bold" isLoading={props.isSubmitting} type="submit"><Text>Withdraw<br></br><Text fontSize="xs" as="span">(0.15 XPR)</Text></Text></Button>
+                            ? <Button isDisabled={!address || !enabled || !bestToken || isMismatched} size="lg" width="10em" colorScheme="teal" fontWeight="bold" isLoading={props.isSubmitting} type="submit"><Text>Withdraw<br></br><Text fontSize="xs" as="span">(150 XPR)</Text></Text></Button>
                             : <Button isDisabled={!address || !bestToken?.address || isMismatched} size="md" width="10em" colorScheme="teal" fontWeight="bold" onClick={enable}><Text>Enable</Text></Button>
                           }
                         </HStack>

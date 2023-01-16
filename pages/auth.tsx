@@ -61,6 +61,7 @@ const Auth: NextPage = () => {
     Register: "Login",
   };
   const [name, setName] = useState("");
+  const [isLabelOpen, setIsLabelOpen] = useState(false)
   const [telegramId, setTelegramId] = useState("");
   const [password, setPassword] = useState("");
 
@@ -143,8 +144,11 @@ const Auth: NextPage = () => {
                           <Flex>
                             <Input flex="84" value={telegramId} onChange={(e) => setTelegramId(e.target.value)} placeholder="Telegram ID" background={colorMode === "dark" ? "rgba(49, 130, 206, 0.4)" : "#90cdf4"}/>
                             <Box flex="2"></Box>
-                            <Tooltip alignSelf="end" hasArrow label={tooltip} fontSize='sm'>
-                              <Button flex="14" ml="auto" bg={colorMode === "dark" ? "#90cdf4" : "#3182ce"} cursor="unset" borderRadius="full" fontSize={["xs", "sm", "md", "md"]}>New<InfoIcon ml="2"/></Button>
+                            <Tooltip alignSelf="end" hasArrow label={tooltip} fontSize='sm' isOpen={isLabelOpen}>
+                              <Flex flex="14" align="center" p="2" bg={colorMode === "dark" ? "#90cdf4" : "#3182ce"} borderRadius="full" fontSize={["3xs", "2xs", "xs", "xs"]} onMouseEnter={() => setIsLabelOpen(true)} onMouseLeave={() => setIsLabelOpen(false)}>
+                                New
+                                <InfoIcon ml="2"/>
+                              </Flex>
                             </Tooltip>
                           </Flex>
                         </FormControl>

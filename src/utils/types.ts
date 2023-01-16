@@ -1,3 +1,4 @@
+import { User } from "next-auth";
 import { Errors } from "utils/Errors";
 
 type TTransaction = {
@@ -10,4 +11,9 @@ type TTransaction = {
 export interface ITransactions {
   transactions?: TTransaction[];
   error?: Errors;
+}
+
+export interface IWithdraw {
+  btcPrice: number;
+  xprPrice: number;
 }
