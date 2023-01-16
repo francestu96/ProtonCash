@@ -15,7 +15,6 @@ export const getServerSideProps: GetServerSideProps = async () => {
   const res = await fetch("https://blockchain.info/ticker")
   const data = await res.json()
 
-  console.log(data)
   return {
     props: {
       btcPrice: data["USD"]["last"],
