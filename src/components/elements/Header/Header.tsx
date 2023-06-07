@@ -18,7 +18,8 @@ const Header = () => {
   
   useEffect(() => {
     if (isMismatched && switchNetwork) {
-      switchNetwork(parseInt(process.env.NEXT_PUBLIC_APP_CHAIN_ID || "1"));
+
+      switchNetwork(process.env.NEXT_PUBLIC_APP_CHAIN == "binance" ? 56 : 97);
     }
   }, [address]);
 
@@ -31,7 +32,7 @@ const Header = () => {
               <NavItem key={`link-${link.label}`} {...link} />
             ))}
           </HStack>
-          <HStack alignItems="end" gap={'10px'}>
+          <HStack alignItems="center" gap={'10px'}>
             {session ? (
               <>
                 <Popover trigger={'hover'} placement={'bottom-end'}>
@@ -64,7 +65,7 @@ const Header = () => {
                       <Button size="sm" onClick={() => signOut()}  backgroundColor={colorMode === "dark" ? "#90cdf4" : "#3182ce"}>Sign Out</Button> 
                   </PopoverContent>
                 </Popover>
-                <ConnectWallet accentColor={colorMode === "dark" ? "#90cdf4" : "#3182ce"}/>
+                <ConnectWallet style={colorMode === "dark" ? {background: "#90cdf4", height: "70%"} : {background: "#3182ce", height: "70%"}}/>
               </>
               ) : (
               <Button size="lg" onClick={() => signIn()}  backgroundColor={colorMode === "dark" ? "#90cdf4" : "#3182ce"}>Sign In</Button> 

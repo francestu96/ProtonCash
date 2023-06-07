@@ -12,13 +12,13 @@ const config = {
 };
 
 const theme = extendTheme({ config });
-const activeChainId = parseInt(process.env.NEXT_PUBLIC_APP_CHAIN_ID || "1");
+const activeChain = process.env.NEXT_PUBLIC_APP_CHAIN || "binance-testnet";
 
 const MyApp = ({Component, pageProps}: AppProps<{session: Session}>) => {
   return (
     <ChakraProvider resetCSS theme={theme}>
       <SessionProvider session={pageProps.session}>
-        <ThirdwebProvider desiredChainId={activeChainId}>
+        <ThirdwebProvider activeChain={activeChain}>
           <Component {...pageProps} />
         </ThirdwebProvider>
       </SessionProvider>

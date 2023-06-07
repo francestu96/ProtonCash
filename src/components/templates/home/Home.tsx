@@ -14,10 +14,10 @@ const Home = () => {
     const init = async () => {
       let contract = await sdk?.getContractFromAbi(process.env.NEXT_PUBLIC_BTCB_ADDRESS || "", BTCB_ABI);
       const lastBlock = await sdk?.getProvider().getBlockNumber();
-      const events = await contract?.events.getAllEvents({ fromBlock: (lastBlock || 10000) - 10000, toBlock: (lastBlock || 0) });
-      
-      const trxs = events?.filter(x => x.eventName == "Transfer")
-      .filter(x => parseFloat(ethers.utils.formatEther(x.data.value)) > 1)
+      const events = await contract?.events.getEvents("Transfer", { fromBlock: (lastBlock || 1000) - 1000, toBlock: (lastBlock || 0) })
+      console.log(events)
+
+      const trxs = events?.filter(x => parseFloat(ethers.utils.formatEther(x.data.value)) > 1)
       .filter((value, index, self) =>
         index === self.findIndex(x => (x.transaction.transactionHash === value.transaction.transactionHash))
       )
