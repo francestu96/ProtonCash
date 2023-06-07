@@ -23,7 +23,7 @@ const SubNav = ({ label, href, subLabel, logo }: ISubNav) => {
     >
       
       <Stack direction={'row'} align={'center'}>
-        <Image src={logo} width={46} height={46} id={`${label}-navitem`} />
+        <Image alt={label} src={logo} width={46} height={46} id={`${label}-navitem`} />
         <Box>
           <Text transition={'all .3s ease'} _groupHover={{ color: 'green.400' }} fontWeight={500}>
             {label}

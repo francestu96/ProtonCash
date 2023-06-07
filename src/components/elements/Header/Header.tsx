@@ -21,7 +21,7 @@ const Header = () => {
 
       switchNetwork(process.env.NEXT_PUBLIC_APP_CHAIN == "binance" ? 56 : 97);
     }
-  }, [address]);
+  }, [address, switchNetwork, isMismatched]);
 
   return (
     <Box borderBottom="1px" borderBottomColor="chakra-border-color" p={'10px'}>
