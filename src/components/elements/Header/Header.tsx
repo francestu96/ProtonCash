@@ -88,7 +88,7 @@ const Header = () => {
                 {session ? (
                   <Box mb="2">
                     <HStack gap={'10px'}>
-                      <ConnectWallet accentColor={colorMode === "dark" ? "#90cdf4" : "#3182ce"}/>
+                      <ConnectWallet style={colorMode === "dark" ? {background: "#90cdf4", height: "70%"} : {background: "#3182ce", height: "70%"}}/>
                       <ColorModeButton />
                     </HStack>
                     <Center mt="1">
